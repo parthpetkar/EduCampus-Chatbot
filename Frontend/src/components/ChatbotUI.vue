@@ -69,6 +69,8 @@
 </template>
 <script>
 import axios from "axios";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
 
 export default {
   data() {
@@ -172,28 +174,6 @@ export default {
 
       this.recognition.start();
     },
-    // async sendMessage() {
-    //   if (this.userInput.trim() !== "" || this.file) {
-    //     const formData = new FormData();
-    //     formData.append("query", this.userInput.trim());
-    //     if (this.file) formData.append("file", this.file);
-
-    //     this.messages.push({ text: this.userInput, type: "user" });
-    //     this.userInput = "";
-
-    //     try {
-    //       const response = await axios.post("http://localhost:5000/api/query", formData, {
-    //         headers: { "Content-Type": "multipart/form-data" },
-    //       });
-
-    //       const botResponse = this.formatBotResponse(response.data.response);
-    //       this.messages.push({ text: botResponse, type: "bot" });
-    //     } catch (error) {
-    //       console.error("Error sending message:", error);
-    //       this.messages.push({ text: "Sorry, an error occurred.", type: "bot" });
-    //     }
-    //   }
-    // },
 
     async sendMessage() {
       if (this.userInput.trim() !== "" || this.file) {
@@ -211,9 +191,6 @@ export default {
           console.log(response)
           const botResponse = this.formatBotResponse(response.data.response);
           this.messages.push({ text: botResponse, type: "bot" });
-
-          // Narrate the bot's response
-          // this.narrateText(botResponse);
           if (this.isNarrationEnabled) {
             this.narrateText(botResponse);
           }
@@ -246,55 +223,36 @@ export default {
     formatBotResponse(botResponse) {
       const pattern = /"response":\s*"(.*?)"/s;
       const match = pattern.exec(botResponse);
-      if (match) {
-        let formattedText = match[1];
+      let formattedText = match ? match[1] : botResponse;
 
-        // Decode and clean up escaped characters
-        formattedText = formattedText
-          .replace(/\\n/g, "\n")
-          .replace(/\\"/g, '"')
-          .replace(/^Details:\s*/, "");
+      // Decode and clean up escaped characters
+      formattedText = formattedText
+        .replace(/\\n/g, "\n")
+        .replace(/\\"/g, '"')
+        .replace(/^Details:\s*/, "");
 
-        // Convert URLs to buttons
-        formattedText = formattedText.replace(/\b(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*\b/g, (url) => {
-          const buttonLabel = "Open Link";
-          return `<button class="url-button" onclick="window.open('${url}', '_blank')">${buttonLabel}</button>`;
-        });
+      // Convert URLs to buttons
+      formattedText = formattedText.replace(/\b(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*\b/g, (url) => {
+        const buttonLabel = "Open Link";
+        return `<button class="url-button" onclick="window.open('${url}', '_blank')">${buttonLabel}</button>`;
+      });
 
-        // Highlight emails
-        formattedText = formattedText.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, (email) => {
-          return `<span class="highlight">${email}</span>`;
-        });
+      // Highlight emails
+      formattedText = formattedText.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, (email) => {
+        return `<span class="highlight">${email}</span>`;
+      });
 
-        // Format phone numbers with icon
-        formattedText = formattedText.replace(/\b\d{10}\b/g, (phone) => {
-          return `<div class="contact">
-                <span class="contact-icon">📞</span>
-                <span class="contact-number">${phone}</span>
-              </div>`;
-        });
+      // Format phone numbers with icon
+      formattedText = formattedText.replace(/\b\d{10}\b/g, (phone) => {
+        return `<div class="contact">
+          <span class="contact-icon">📞</span>
+          <span class="contact-number">${phone}</span>
+        </div>`;
+      });
 
-        // Convert points (lines starting with ">") into a list
-        if (formattedText.includes(">")) {
-          const listItems = formattedText
-            .split("\n")
-            .map((line) => {
-              if (line.trim().startsWith(">")) {
-                return `<li>${line.trim().substring(1).trim()}</li>`;
-              }
-              return line; // Keep other lines as they are
-            })
-            .join("\n");
-
-          formattedText = `<ul>${listItems}</ul>`;
-        }
-
-        // Ensure decimal points are interpreted correctly
-        formattedText = formattedText.replace(/(\d+)\.(\d+)/g, "$1.$2");
-
-        return formattedText;
-      }
-      return botResponse;
+      // Convert Markdown to HTML and sanitize
+      const html = marked.parse(formattedText);
+      return DOMPurify.sanitize(html);
     },
 
 
