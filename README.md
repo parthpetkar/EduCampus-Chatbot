@@ -54,7 +54,13 @@ To set up EduCampus locally, follow these steps:
 4. **Set up environmental variables**:
    
    Use .env.example
-   
+
+5. Set up Qdrant
+   ```sh
+    docker pull qdrant/qdrant 
+    docker run -p 6333:6333 -v .:/qdrant/storage qdrant/qdrant
+   ```
+
 6. **Set up database**:
     ```sh
     # Run the file ingest.py
