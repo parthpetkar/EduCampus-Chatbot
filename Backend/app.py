@@ -1,11 +1,11 @@
-from flask import Flask, jsonify, request # type: ignore
+from flask import Flask, jsonify, request  
 from api.retrieval import retrieval_blueprint
 from api.generation import generation_blueprint
 from api.chat_with_pdf import chat_blueprint
 from api.audio_conversion import audio_blueprint
 from config import config
-from flask_cors import CORS # type: ignore
-from werkzeug.utils import secure_filename # type: ignore
+from flask_cors import CORS  
+from werkzeug.utils import secure_filename  
 import os
 
 app = Flask(__name__)

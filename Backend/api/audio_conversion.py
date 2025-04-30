@@ -1,6 +1,6 @@
-from flask import Blueprint, request, jsonify # type: ignore
-from werkzeug.utils import secure_filename # type: ignore
-from groq import Groq   # type: ignore
+from flask import Blueprint, request, jsonify  
+from werkzeug.utils import secure_filename  
+from groq import Groq    
 import os
 
 audio_blueprint = Blueprint('audio_conversion', __name__)

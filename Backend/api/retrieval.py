@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify, request # type: ignore
-from qdrant_client import QdrantClient # type: ignore
-from langchain_qdrant import QdrantVectorStore # type: ignore
-from langchain_community.embeddings import FastEmbedEmbeddings # type: ignore
+from flask import Blueprint, jsonify, request  
+from qdrant_client import QdrantClient  
+from langchain_qdrant import QdrantVectorStore  
+from langchain_community.embeddings import FastEmbedEmbeddings  
 from config import config
 
 retrieval_blueprint = Blueprint('retrieval', __name__)
@@ -10,7 +10,7 @@ qdrant_client = QdrantClient(url=config.QDRANT_URL, api_key=config.QDRANT_API_KE
 embeddings = FastEmbedEmbeddings()
 vector_store = QdrantVectorStore(client=qdrant_client, collection_name=config.COLLECTION_NAME, embedding=embeddings)
 
-retriever = vector_store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"k": 8, "score_threshold": 0.5})
+retriever = vector_store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"k": 5, "score_threshold": 0.4})
 
 @retrieval_blueprint.route('/retrieve', methods=['POST'])
 def retrieve():

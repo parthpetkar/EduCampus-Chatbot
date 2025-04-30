@@ -1,7 +1,7 @@
-from langchain_groq import ChatGroq # type: ignore
-from langchain.prompts import PromptTemplate# type: ignore
-from langchain.schema.output_parser import StrOutputParser# type: ignore
-from langchain.schema.runnable import RunnablePassthrough # type: ignore
+from langchain_groq import ChatGroq  
+from langchain.prompts import PromptTemplate 
+from langchain.schema.output_parser import StrOutputParser 
+from langchain.schema.runnable import RunnablePassthrough  
 from config import config
 
 # Initialize Groq model with API key
@@ -41,14 +41,16 @@ def get_prompt_template(use_case):
             template="""
             <s> [INST] You are an expert assistant providing detailed information specifically about Vishwakarma Institute of Technology (VIT), Pune. 
             Please ensure that your response follows these rules:
+            Rules:
+            1. Only provide information about Vishwakarma Institute of Technology(VIT), Pune.
+            2. Always answer in polite and professional manner.
+            3. Answer the user query in structured format and make sure the answer is clear, concise and easy to read.
 
             Guidelines:
-            1. Only provide information about Vishwakarma Institute of Technology(VIT), Pune.
             2. Always base your responses on the provided documents. If the documents lack relevant information, politely inform the user that the information is not available and do not specify the internal working of the application.
-            3. Your response should be at max 120 words long.
-            4. Identify what the user whats to do and always provide a link in the response based on the query.
-            5. When a user provides their MHT-CET percentile, compare it with the cutoff percentiles for MHTCET for various branches and inform them whether they are eligible for admission.
-            6. If the user requests steps, guidance for a precedure such as admission then respond in point wise manner. Denote the start of point by '>'.
+            3. Identify what the user whats to do and always provide a link in the response based on the query.
+            4. When a user provides their MHT-CET percentile, compare it with the cutoff percentiles for MHTCET for various branches and inform them whether they are eligible for admission.
+            5. If the user requests steps, guidance for a precedure such as admission then respond in point wise manner.
 
             Response format:
             Details: [Provide a friendly and helpful response based on the context.]
@@ -61,26 +63,9 @@ def get_prompt_template(use_case):
             """
         )
     
-    if use_case == "refined_query":
-        return PromptTemplate(
-            input_variables=["context", "question"],
-            template="""
-            <s> [INST] You are tasked with generating a refined and precise query based on the provided context and user question.
-            Guidelines:
-            1. The user query is only about Vishwakarma Institute of Technology(VIT), Pune.
-            2. The user provides a document which contents information about the scores of an examination, use those that information to refine the query.
-
-            Context: {context}
-
-            User Question: {question}
-
-            Refined Query: [/INST]
-            """
-        )
-    
     if use_case == "chat_with_pdf":
         return PromptTemplate(
-            input_variables=["context", "question", "refined_query"],
+            input_variables=["context", "question", "query"],
             template="""
             <s> [INST] You are an expert assistant specialized in providing detailed and accurate information about Vishwakarma Institute of Technology (VIT), Pune. Users may upload their marks documents containing Merit Rank and CET Percentile Scores. You will assist them with queries related to admissions based on their scores. Please adhere to the following guidelines:
 
@@ -97,27 +82,9 @@ def get_prompt_template(use_case):
             Details: [Provide a clear, friendly, and helpful response based on the context.]
 
             Original User Question: {question}
-            Refined Query: {refined_query}
+            Query: {query}
             Context: {context}
 
             Answer: [/INST]
-        """
-    )
-    if use_case == "refine_query":
-        return PromptTemplate(
-            input_variables=["question"],
-            template="""
-            <s> [INST] You are an expert assistant tasked with refining user queries to make them specific, clear, and actionable. Your role is to interpret the intent behind the query and rewrite it to be focused, detailed, and easy to process. The queries can be related to admissions, facilities, events, departments, or any general information about Vishwakarma Institute of Technology (VIT), Pune. Please adhere to the following guidelines:
-
-            Guidelines:
-            1. Clarity: Eliminate ambiguity by rewriting the query to ensure it is precise and understandable.
-            2. Specificity: Include as much relevant detail as possible based on the intent of the user's original query.
-            3. Conciseness: Keep the refined query brief while maintaining its completeness and specificity.
-            4. Relevance: Focus on refining the query to address information about VIT Pune (e.g., admissions, cutoffs, facilities, events, programs, or other institute-related topics).
-            5. Professional Tone: Maintain a polite and professional tone in the refined query.
-
-            Original Query: {question}
-
-            Refined Query: [/INST]
         """
     )

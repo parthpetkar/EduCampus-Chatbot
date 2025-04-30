@@ -1,15 +1,15 @@
-from flask import Blueprint, jsonify, request  # type: ignore
+from flask import Blueprint, jsonify, request   
 import os
 from api.retrieval import retriever  # Assuming retriever is already set up for the chatbot collection
 from api.common import format_docs, run_chain, get_prompt_template
-from qdrant_client import QdrantClient  # type: ignore
-from langchain_qdrant import QdrantVectorStore  # type: ignore
-from qdrant_client.http.models import Distance, VectorParams  # type: ignore
-from langchain_community.embeddings import FastEmbedEmbeddings  # type: ignore
-from langchain_community.document_loaders import PyPDFLoader  # type: ignore
+from qdrant_client import QdrantClient   
+from langchain_qdrant import QdrantVectorStore   
+from qdrant_client.http.models import Distance, VectorParams   
+from langchain_community.embeddings import FastEmbedEmbeddings   
+from langchain_community.document_loaders import PyPDFLoader   
 from config import config
 from uuid import uuid4
-from langchain.docstore.document import Document  # type: ignore # Add this import
+from langchain.docstore.document import Document    # Add this import
 
 # Blueprint for the chat routes
 chat_blueprint = Blueprint('chat_with_pdf', __name__)
@@ -68,14 +68,8 @@ def generate():
         pdf_context = format_docs(pdf_results)
         print(pdf_context)
 
-        # Step 2: Use LLM to generate a refined query
-        inputs_for_refined_query = {"context": pdf_context, "question": query}
-        refined_query_template = get_prompt_template("refined_query")
-        refined_query = run_chain(refined_query_template, inputs_for_refined_query)
-        print(f"Refined query: {refined_query}")
-
         # Step 3: Use the refined query to fetch information from the chatbot collection
-        chatbot_results = retriever.get_relevant_documents(refined_query)
+        chatbot_results = retriever.get_relevant_documents(query)
         chatbot_context = format_docs(chatbot_results)
 
         # Step 4: Combine all contexts and generate the final response
@@ -89,7 +83,7 @@ def generate():
         final_inputs = {
             "context": combined_context,
             "question": query,
-            "refined_query": refined_query
+            "query": query
         }
         final_prompt_template = get_prompt_template("chat_with_pdf")
         final_answer = run_chain(final_prompt_template, final_inputs)

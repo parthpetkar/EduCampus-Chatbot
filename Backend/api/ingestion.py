@@ -1,9 +1,9 @@
-from qdrant_client import QdrantClient # type: ignore
-from qdrant_client.http.models import Distance, VectorParams # type: ignore
-from langchain_qdrant import QdrantVectorStore # type: ignore
-from langchain_community.document_loaders import PyPDFLoader # type: ignore
-from langchain.text_splitter import RecursiveCharacterTextSplitter # type: ignore
-from langchain_community.embeddings import FastEmbedEmbeddings # type: ignore
+from qdrant_client import QdrantClient  
+from qdrant_client.http.models import Distance, VectorParams  
+from langchain_qdrant import QdrantVectorStore  
+from langchain_community.document_loaders import PyPDFLoader  
+from langchain.text_splitter import RecursiveCharacterTextSplitter  
+from langchain_community.embeddings import FastEmbedEmbeddings  
 import os
 from config import config
 from concurrent.futures import ThreadPoolExecutor

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request # type: ignore
+from flask import Blueprint, jsonify, request  
 from api.common import format_docs, run_chain, get_prompt_template
 from api.retrieval import retriever
 
@@ -17,11 +17,6 @@ def generate():
         data = request.get_json()
         query = data.get("query", "What is the purpose of this document?")
         
-        # inputs = {"question": query}
-        # prompt_template = get_prompt_template("refine_query")
-        # query = run_chain(prompt_template, inputs)
-        # print(query)
-
         results = retriever.get_relevant_documents(query)
         context = format_docs(results)
         
