@@ -1,9 +1,11 @@
 from flask import Blueprint, jsonify, request  
-from api.common import format_docs, run_chain, get_prompt_template
-from api.retrieval import retriever
-
+from api.common import QdrantService, PromptService
+from config import config
 
 generation_blueprint = Blueprint('generation', __name__)
+
+qdrant_service = QdrantService(url=config.QDRANT_URL, api_key=config.QDRANT_API_KEY, collection_name=config.COLLECTION_NAME)
+retriever = qdrant_service.get_retriever()
 
 @generation_blueprint.route('/generate', methods=['POST'])
 def generate():
@@ -18,14 +20,14 @@ def generate():
         query = data.get("query", "What is the purpose of this document?")
         
         results = retriever.get_relevant_documents(query)
-        context = format_docs(results)
+        context = PromptService.format_docs(results)
         
         if not context:
             return jsonify({"answer": "I don't know the answer."})
 
         inputs = {"context": context, "question": query}
-        prompt_template = get_prompt_template("generation")
-        answer = run_chain(prompt_template, inputs)
+        prompt_template = PromptService.get_prompt_template("generation")
+        answer = PromptService.run_chain(prompt_template, inputs)
         
         return jsonify({"query": query, "response": answer})
 
